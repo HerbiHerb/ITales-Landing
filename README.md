@@ -58,7 +58,7 @@ npm run optimize:media -- path/to/image.png public/assets/media/image.webp
 
 ## Formspree setup
 
-1. The ITales form ID is already configured as `xvkgdppk`. Verify the receiving email address in Formspree. If replacing the form later, override its public ID with `VITE_FORMSPREE_FORM_ID`.
+1. The ITales form ID is already configured as `xvkgdppk`. Link and verify `feedback@itales.eu` in the Formspree account, then select it as the target address in the form's Workflow → Email settings. Changing the contact links on this website does not change the Formspree recipient. If replacing the form later, override its public ID with `VITE_FORMSPREE_FORM_ID`.
 2. Keep the form compatible with JSON/AJAX submissions. No email field should be required: feedback without an email must work. The form uses Formspree's basic spam filtering; if you enable CAPTCHA, the matching client integration must be added first.
 3. Restrict submissions to the deployed domain using Formspree's form settings where appropriate.
 4. Send a real test both without email and with email plus notification consent. Confirm that the answers arrive in the dashboard and receiving inbox.
@@ -67,7 +67,7 @@ Responses go directly from the browser to Formspree. Only a successful response 
 
 The free plan currently allows 50 submissions per month and a 30-day dashboard archive. Submission export is a paid feature. Receiving emails are separate copies: review capacity and delete feedback and contact details when their stated purposes end. No automatic launch emails or recurring newsletter are implemented.
 
-Provider references: [AJAX forms](https://help.formspree.io/articles/building-your-form/submit-forms-with-javascript-ajax/), [plans](https://formspree.io/plans/).
+Provider references: [AJAX forms](https://help.formspree.io/articles/building-your-form/submit-forms-with-javascript-ajax/), [changing the recipient email](https://help.formspree.io/articles/form-and-project-settings/changing-a-form-email-address), [plans](https://formspree.io/plans/).
 
 ## GA4 setup and evaluation
 
