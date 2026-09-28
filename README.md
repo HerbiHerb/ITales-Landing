@@ -48,7 +48,18 @@ gameWorlds: {
 }
 ```
 
-Empty video values show only the configured image. Videos have native controls, no autoplay and `preload="none"`. Use MP4 or WebM, short recordings and WebVTT captions for spoken content. Existing media are illustrations, not application screenshots. Set the optional `caption` when replacing illustrations with real screenshots. The carousel has three image-only entries in the same configuration. Images below the hero load lazily; fonts are served locally with their OFL licenses.
+Empty video values show only the configured image. Videos have native controls, no page-load autoplay and `preload="none"`. Use MP4 or WebM and WebVTT captions for spoken content. Set the optional `caption` when replacing illustrations with real screenshots. The carousel has three image-only entries in the same configuration. Images below the hero load lazily; fonts are served locally with their OFL licenses.
+
+The two home teaser cards use the full Game and Editor recordings in `public/assets/media/videos/`, optimized to H.264 MP4 at 1280px wide and 24fps with fast-start metadata, plus WebP posters. Together the videos are about 3.5 MB. Their `playOnHover: true` configuration starts muted, looping playback when a mouse enters the card and pauses it on leaving, scrolling it off screen or hiding the tab. Touch users and visitors with reduced motion use the native controls instead; automatic hover playback is disabled with reduced motion. If loading fails, the poster image remains as the fallback. Without JavaScript, the static HTML shows these same posters.
+
+Full-resolution originals are preserved locally in `source-media/videos/` (ignored by Git and excluded from Vite's public directory). Only optimized files are deployed. To regenerate a preview with an installed FFmpeg, for example:
+
+```sh
+ffmpeg -i source-media/videos/game_demo1.mp4 -map 0:v:0 -map '0:a:0?' -vf 'crop=iw-50:ih-116:50:116,scale=1280:-2,fps=24' -c:v libx264 -preset medium -crf 25 -pix_fmt yuv420p -c:a aac -b:a 64k -map_metadata -1 -movflags +faststart public/assets/media/videos/game-preview.mp4
+ffmpeg -ss 60 -i public/assets/media/videos/game-preview.mp4 -frames:v 1 -c:v libwebp -quality 82 public/assets/media/videos/game-preview.webp
+```
+
+The Game crop removes the recorded browser tabs, bookmarks and sidebar. For the Editor recording, use the corresponding filenames, omit the crop filter and extract its poster at 110 seconds. Other section images are still illustration placeholders.
 
 To optimize a replacement image:
 
@@ -118,7 +129,7 @@ npx playwright install --with-deps chromium
 npm test
 ```
 
-Playwright builds and serves the actual HTML/CSS/JS twice, at `/` and `/ITales-Landing/`. External Formspree and Google endpoints are intercepted; automated tests do not send real feedback or analytics. Tests cover responsive pages and assets, direct reloads, navigation, reduced motion, form validation, optional email consent, confirmed submissions, double-send prevention, retained answers on errors and analytics consent/revocation.
+Playwright builds and serves the actual HTML/CSS/JS twice, at `/` and `/ITales-Landing/`. External Formspree and Google endpoints are intercepted; automated tests do not send real feedback or analytics. Tests cover responsive pages and assets, direct reloads, navigation, hover video playback and fallback controls, reduced motion, form validation, optional email consent, confirmed submissions, double-send prevention, retained answers on errors and analytics consent/revocation.
 
 A custom Chromium executable can optionally be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
 

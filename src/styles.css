@@ -72,7 +72,7 @@ p { color: var(--text-secondary); }
 .preview-media figcaption { position: absolute; bottom: .8rem; left: .8rem; max-width: calc(100% - 1.6rem); border: 1px solid rgba(148,163,184,.35); border-radius: 999px; padding: .25rem .65rem; color: #e2e8f0; background: rgba(2,6,23,.83); font-size: .68rem; letter-spacing: .02em; pointer-events: none; }
 .preview-media:has(video) figcaption { position: static; background: none; border: 0; padding: .5rem .8rem; }
 .teaser-card .preview-media { border: 0; border-radius: 0; }
-.teaser-card .preview-media img { aspect-ratio: 16 / 9; }
+.teaser-card .preview-media img, .teaser-card .preview-media video { aspect-ratio: 16 / 9; object-fit: contain; background: #020617; }
 .teaser-copy { padding: 1.75rem; }
 .teaser-copy h3 { font-size: 1.8rem; }
 .teaser-copy p:not(.eyebrow) { margin: 1rem 0; }
