@@ -1,1 +1,116 @@
-# ITales-Landing
+# ITales Landing
+
+A static, English ITales interest site: home, Game preview, Editor preview and a short feedback form. The legal and privacy pages use the existing ITales operator details. No application backend, login or Firebase dependency is included.
+
+## Local development
+
+Requires Node.js 24 and npm.
+
+```sh
+npm ci
+cp .env.example .env.local
+npm run dev
+```
+
+Without service IDs, the pages work as a visual preview and the feedback button is disabled. No submission is simulated. Set the public identifiers in `.env.local` to enable the integrations:
+
+```dotenv
+VITE_FORMSPREE_FORM_ID=your_form_id
+VITE_GA_MEASUREMENT_ID=G-YOURID
+VITE_BASE_PATH=./
+```
+
+Use the last part of `https://formspree.io/f/your_form_id` as the Formspree ID. These identifiers are intentionally public; never add private service keys. `.env.local` is ignored by Git.
+
+```sh
+npm run build
+npm run preview
+```
+
+`npm run build` permits an unconfigured preview. `npm run build:production` requires both valid service IDs and fails if either is missing.
+
+## Content and media
+
+Page copy is in the HTML pages. Shared navigation, footer and consent markup live in `src/templates/shell.js` and are inserted by Vite into every HTML page during development and build. The resulting pages remain navigable without JavaScript.
+
+`src/config/media.js` maps each section to its local image, alternative text, optional video, poster and captions. Paths are relative to `public/`. For example:
+
+```js
+gameWorlds: {
+  image: 'assets/media/game-worlds.webp',
+  alt: 'An ITales scene with story text and choices',
+  video: 'assets/media/game-worlds.mp4',
+  poster: 'assets/media/game-worlds.webp',
+  captions: 'assets/media/game-worlds.vtt',
+  caption: 'ITales Game preview',
+}
+```
+
+Empty video values show only the configured image. Videos have native controls, no autoplay and `preload="none"`. Use MP4 or WebM, short recordings and WebVTT captions for spoken content. Existing media are illustrations, not application screenshots. Set the optional `caption` when replacing illustrations with real screenshots. The carousel has three image-only entries in the same configuration. Images below the hero load lazily; fonts are served locally with their OFL licenses.
+
+To optimize a replacement image:
+
+```sh
+npm run optimize:media -- path/to/image.png public/assets/media/image.webp
+```
+
+## Formspree setup
+
+1. Create and activate a form, verify the receiving email address and copy its public form ID.
+2. Keep the form compatible with JSON/AJAX submissions. No email field should be required: feedback without an email must work. The form uses Formspree's basic spam filtering; if you enable CAPTCHA, the matching client integration must be added first.
+3. Restrict submissions to the deployed domain using Formspree's form settings where appropriate.
+4. Send a real test both without email and with email plus notification consent. Confirm that the answers arrive in the dashboard and receiving inbox.
+
+Responses go directly from the browser to Formspree. Only a successful response with `ok: true` shows the success screen and emits `interest_submit_success`. Network, service and validation errors retain answers. A timeout cannot establish whether Formspree received the request, so the site reports that uncertainty and never retries automatically.
+
+The free plan currently allows 50 submissions per month and a 30-day dashboard archive. Submission export is a paid feature. Receiving emails are separate copies: review capacity and delete feedback and contact details when their stated purposes end. No automatic launch emails or recurring newsletter are implemented.
+
+Provider references: [AJAX forms](https://help.formspree.io/articles/building-your-form/submit-forms-with-javascript-ajax/), [plans](https://formspree.io/plans/).
+
+## GA4 setup and evaluation
+
+1. Create a GA4 web stream for this site and copy its measurement ID.
+2. In Enhanced measurement, disable **Form interactions**. The site's success event only fires when Formspree confirms receipt; automatic `form_submit` is not used as success.
+3. Disable Google Signals and advertising personalization in the property, and set event-data retention to **2 months** to match the privacy notice.
+4. Create event-scoped custom dimensions for `source_page` and `cta_position`.
+5. Mark `interest_submit_success` as a key event. Do not mark button clicks or form starts as successful responses.
+6. After allowing analytics, verify `page_view`, `interest_click`, `interest_form_start` and `interest_submit_success` in Realtime/DebugView. For DebugView, use the Google Analytics Debugger browser extension during the real test.
+
+Analytics scripts load only after explicit consent. Declining prevents Google requests; revocation blocks tracking and removes this site's prefixed cookies. The choice lasts up to six months, is shared across the pages, and is scoped to the site's base path. No email, comment or survey answers enter GA4. Page URLs and referrers are stripped of query parameters and fragments.
+
+Use a consistent cohort and unique users rather than raw event counts:
+
+| Metric | Evaluation |
+| --- | --- |
+| Reach | Users who visited home, Game or Editor after consenting |
+| CTA rate | Users who clicked an interest button / users who visited those pages |
+| Form completion | Users with confirmed submission / users who started the form |
+| Game vs. Editor | Compare the same funnel by `source_page` |
+| Total feedback | All received answers in Formspree, including visitors who declined Analytics |
+| Interest quality | Distribution of interest area, 1–5 ratings, comments and optional notification requests in Formspree |
+
+Set up a GA4 funnel exploration for page visit → `interest_click` → `interest_form_start` → `interest_submit_success`. Keep direct form visitors separate where appropriate. Analytics results cover only consenting, measurable visitors; never divide all Formspree responses by GA4 visitors. Small samples are directional feedback, not a universal success/failure verdict.
+
+Provider references: [custom events](https://developers.google.com/analytics/devguides/collection/ga4/events), [basic consent mode](https://developers.google.com/tag-platform/security/concepts/consent-mode).
+
+## Browser checks
+
+```sh
+npx playwright install --with-deps chromium
+npm test
+```
+
+Playwright builds and serves the actual HTML/CSS/JS twice, at `/` and `/ITales-Landing/`. External Formspree and Google endpoints are intercepted; automated tests do not send real feedback or analytics. Tests cover responsive pages and assets, direct reloads, navigation, reduced motion, form validation, optional email consent, confirmed submissions, double-send prevention, retained answers on errors and analytics consent/revocation.
+
+A custom Chromium executable can optionally be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+
+## GitHub Pages
+
+The workflow checks builds and browser tests on pull requests. Pushes to `main` and manual workflow runs on `main` also build and deploy `dist` after checks pass.
+
+1. In repository **Settings → Pages**, select **GitHub Actions** as the source.
+2. Add repository Actions variables `VITE_FORMSPREE_FORM_ID` and `VITE_GA_MEASUREMENT_ID`.
+3. Merge the prepared changes into `main` when ready to publish. The workflow gets the correct base path from GitHub Pages; it supports both project sites and custom domains.
+4. On the deployed URL, verify direct Game/Editor/form links, the real Formspree test and GA4 DebugView with consent allowed. With consent declined, verify no Google requests and a working form.
+
+Before publishing, confirm the inherited operator/contact details and that service settings match the privacy notice. No external accounts or repository settings are changed by the implementation.
