@@ -73,12 +73,12 @@ Provider references: [AJAX forms](https://help.formspree.io/articles/building-yo
 
 1. The ITales web stream is configured as `G-8W3LYVD7NH`. Check that this stream's website URL matches the deployed site.
 2. In Enhanced measurement, disable **Form interactions**. The site's success event only fires when Formspree confirms receipt; automatic `form_submit` is not used as success.
-3. Disable Google Signals and advertising personalization in the property, and set event-data retention to **2 months** to match the privacy notice.
+3. Keep advertising-related consent denied and disable unused advertising/data-sharing features in the account. Keep user- and event-data retention at **2 months** to match the privacy notice. Review “Reset user data on new activity”; the notice explains that user-identifier retention may restart. The retention setting does not expire standard aggregated reports.
 4. Create event-scoped custom dimensions for `source_page` and `cta_position`.
 5. Mark `interest_submit_success` as a key event. Do not mark button clicks or form starts as successful responses.
 6. After allowing analytics, verify `page_view`, `interest_click`, `interest_form_start` and `interest_submit_success` in Realtime/DebugView. For DebugView, use the Google Analytics Debugger browser extension during the real test.
 
-Analytics scripts load only after explicit consent. Declining prevents Google requests; revocation blocks tracking and removes this site's prefixed cookies. The choice lasts up to six months, is shared across the pages, and is scoped to the site's base path. No email, comment or survey answers enter GA4. Page URLs and referrers are stripped of query parameters and fragments.
+Analytics scripts load only after explicit consent. Declining prevents Google requests; revocation blocks tracking and removes this site's prefixed cookies. The choice is honoured for 180 days, is shared across the pages, and is scoped to the site's base path. Its local-storage entry remains until replaced or cleared; returning after expiry prompts for a new choice. Analytics cookies are configured for 180 days and can be renewed on subsequent visits with consent. No email, comment or survey answers enter GA4. Page URLs and referrers are stripped of query parameters and fragments.
 
 Use a consistent cohort and unique users rather than raw event counts:
 
@@ -94,6 +94,22 @@ Use a consistent cohort and unique users rather than raw event counts:
 Set up a GA4 funnel exploration for page visit → `interest_click` → `interest_form_start` → `interest_submit_success`. Keep direct form visitors separate where appropriate. Analytics results cover only consenting, measurable visitors; never divide all Formspree responses by GA4 visitors. Small samples are directional feedback, not a universal success/failure verdict.
 
 Provider references: [custom events](https://developers.google.com/analytics/devguides/collection/ga4/events), [basic consent mode](https://developers.google.com/tag-platform/security/concepts/consent-mode).
+
+## Legal notice and privacy
+
+`impressum.html` describes this preview and feedback site. Its operator name/address are inherited from ITales-Frontend; confirm they identify the actual operator before publishing. The additional editorial responsibility under § 18(2) MStV was removed because this site presents product previews and a survey. Reassess that section if journalistic/editorial content is added.
+
+`privacy.html` covers GitHub Pages, Formspree, enquiries and notification copies in the Hostinger mailbox, optional launch contacts, GA4 consent, browser storage, retention criteria, international-transfer safeguards and visitor rights. The GA4 user/event retention of two months is confirmed by the operator. Cookie renewal, renewal of user-identifier retention and aggregate-report retention are disclosed separately.
+
+Operational details to keep consistent with the published notice:
+
+- Confirm the Hostinger email product and contracting entity shown in the account; the notice currently describes Hostinger email. If a different mail provider or a Gmail forwarder is used, update the recipients and transfer information.
+- Check the applicable processor agreements and transfer terms for Formspree, Hostinger and Google in the service accounts. Links in the notice describe providers' published safeguards; they do not establish which account terms have been accepted. Do not claim an agreement was signed or an account option was enabled without checking it.
+- Apply the stated deletion criteria to both Formspree submissions and mailbox copies: feedback when no longer needed for the study, enquiries after necessary follow-up, launch contacts after the announcement, withdrawal or abandonment. Keep only required legal records or anonymous summaries beyond those purposes. Formspree's dashboard archive window does not delete mailbox copies.
+- Record review/end dates for the interest study and notification list, and perform deletion/anonymisation when their purposes end. The site does not automatically delete records in external services.
+- Keep Analytics settings aligned with the notice, including two-month user/event retention, the effect of reset on new activity and disabled automatic form measurement. The frontend cannot set or verify the property's server-side retention or account data-sharing options.
+
+References: [§ 5 DDG](https://www.gesetze-im-internet.de/ddg/__5.html), [§ 18 MStV](https://www.gesetze-bayern.de/Content/Document/MStV-18?view=Print), [§ 25 TDDDG](https://www.gesetze-im-internet.de/ttdsg/__25.html), [GDPR](https://eur-lex.europa.eu/eli/reg/2016/679/oj), [Hostinger DPA](https://www.hostinger.com/legal/dpa), [Formspree security and transfer safeguards](https://formspree.io/security/), [Google transfer information](https://business.safety.google/adsdatatransfers/), [GA4 data retention](https://support.google.com/analytics/answer/7667196?hl=en), [Analytics cookie configuration](https://developers.google.com/analytics/devguides/collection/ga4/reference/config#cookie_update).
 
 ## Browser checks
 
