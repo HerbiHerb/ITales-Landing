@@ -93,10 +93,14 @@ test('reduced motion shows hero copy immediately and no empty video players', as
 test('carousel controls change the illustration without autoplay', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('index.html');
+  const firstImage = page.locator('.carousel-item.active img');
+  await firstImage.scrollIntoViewIfNeeded();
+  await expect(firstImage).toHaveJSProperty('naturalWidth', 1273);
+  await expect(firstImage).toHaveAttribute('src', /landing_page\/image_marking\.png$/);
   await page.getByRole('button', { name: 'Next illustration' }).click();
-  await expect(page.locator('.carousel-item.active')).toContainText('Atmospheric worlds');
+  await expect(page.locator('.carousel-item.active')).toContainText('Desktop or mobile');
   await page.getByRole('button', { name: 'Previous illustration' }).click();
-  await expect(page.locator('.carousel-item.active')).toContainText('Epic adventures');
+  await expect(page.locator('.carousel-item.active')).toContainText('New form of interaction');
 });
 
 test('required answers and optional email consent are validated without sending', async ({ page }) => {

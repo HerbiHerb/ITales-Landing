@@ -3,9 +3,9 @@
 // Add captions as a WebVTT path when the video has spoken content.
 // playOnHover enables a muted, looping mouse preview with native controls as a fallback.
 export const media = {
-  carouselAdventure: { image: 'assets/media/adventure.webp', alt: 'Illustrated forest and ancient ruins in an adventurous world' },
-  carouselWorlds: { image: 'assets/media/story-world.webp', alt: 'Atmospheric story illustration' },
-  carouselFuture: { image: 'assets/media/future.webp', alt: 'Illustration of a futuristic world' },
+  carouselAdventure: { image: 'assets/media/landing_page/image_marking.png', alt: 'Interactive story screenshot showing a room with objects to find' },
+  carouselWorlds: { image: 'assets/media/landing_page/desktop_mobile.png', alt: 'Playable stories on mobile devices' },
+  carouselFuture: { image: 'assets/media/landing_page/story_settings.png', alt: 'Customizable story settings' },
   gameTeaser: {
     image: 'assets/media/videos/game-preview.webp',
     alt: 'ITales Game demo showing an interactive story',

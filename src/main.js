@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Carousel from 'bootstrap/js/dist/carousel';
 import './styles.css';
+import './play-background.css';
 import { initAnalytics } from './analytics.js';
 import { initForm } from './form.js';
 import { initHero } from './hero.js';
