@@ -24,7 +24,7 @@ export const media = {
   },
   gameWorlds: { image: 'public/assets/media/game/custom_look.png', alt: 'Custom background and icon positions', video: '', poster: '', captions: '' },
   gameChoices: { image: 'public/assets/media/game/Drei leuchtende Wege im All.png', alt: 'Illustrated story scene showing a world to explore', video: '', poster: '', captions: '' },
-  gameCharacters: { image: 'assets/media/collage.webp', alt: 'Collage of illustrations from different story worlds', video: '', poster: '', captions: '' },
+  gameCharacters: { image: 'public/assets/media/game/interactions.png', alt: 'Collage of illustrations from different story worlds', video: '', poster: '', captions: '' },
   editorWrite: { image: 'assets/media/story-book.webp', alt: 'Illustrated story book representing the writing process', video: '', poster: '', captions: '' },
   editorBranch: { image: 'assets/media/future.webp', alt: 'Futuristic world illustrating one possible story setting', video: '', poster: '', captions: '' },
   editorMedia: { image: 'assets/media/collage.webp', alt: 'Collage representing visual inspiration for a story', video: '', poster: '', captions: '' },
