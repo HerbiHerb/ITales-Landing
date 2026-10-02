@@ -38,6 +38,19 @@ async function completeRequired(page) {
   await page.locator('.rating-option').filter({ has: page.locator('[value="4"]') }).click();
 }
 
+async function expectStaticPreviews(page) {
+  const sections = page.locator('.preview-section');
+  await expect(sections.first()).toBeVisible();
+  await expect(page.locator('.preview-media video')).toHaveCount(0);
+  for (const section of await sections.all()) {
+    const image = section.locator('.preview-media img');
+    await expect(image).toHaveCount(1);
+    await image.scrollIntoViewIfNeeded();
+    await expect(image).toBeVisible();
+    await expect.poll(() => image.evaluate((element) => element.complete && element.naturalWidth > 0)).toBe(true);
+  }
+}
+
 test('all static pages and local assets load at mobile, tablet and desktop sizes', async ({ page }) => {
   const failures = [];
   page.on('pageerror', (error) => failures.push(error.message));
@@ -70,7 +83,8 @@ test('navigation reaches both previews and preserves CTA origin', async ({ page 
   await expect(page).toHaveURL(/interest\.html\?source=game$/);
   await expect(page.locator('[name="source"]')).toHaveValue('game');
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Editor', exact: true }).click();
-  await expect(page.locator('.preview-section')).toHaveCount(3);
+  await expect(page).toHaveURL(/editor\.html$/);
+  await expect(page.getByRole('link', { name: 'Editor', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.locator('[data-interest-cta]').last().click();
   await expect(page.locator('[name="source"]')).toHaveValue('editor');
   await page.goto('interest.html?source=invalid');
@@ -86,7 +100,7 @@ test('reduced motion shows hero copy immediately and no empty video players', as
   for (const path of ['game.html', 'editor.html']) {
     await page.goto(path);
     await expect(page.locator('video')).toHaveCount(0);
-    await expect(page.locator('.preview-media')).toHaveCount(3);
+    await expectStaticPreviews(page);
   }
 });
 
@@ -265,10 +279,17 @@ test('page location and referrer exclude query parameters from analytics', async
 
 test('site works without JavaScript for navigation and static previews', async ({ browser }, testInfo) => {
   const context = await browser.newContext({ javaScriptEnabled: false, baseURL: testInfo.project.use.baseURL });
-  const page = await context.newPage();
-  await page.goto('index.html');
-  await expect(page.locator('[data-landing-typed]').first()).toHaveText('Bring your ideas to life');
-  await page.getByRole('link', { name: 'Game', exact: true }).click();
-  await expect(page.locator('.preview-section')).toHaveCount(3);
-  await context.close();
+  try {
+    const page = await context.newPage();
+    await page.goto('index.html');
+    await expect(page.locator('[data-landing-typed]').first()).toHaveText('Bring your ideas to life');
+    for (const name of ['Game', 'Editor']) {
+      await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name, exact: true }).click();
+      await expect(page).toHaveURL(new RegExp(`${name.toLowerCase()}\\.html$`));
+      await expect(page.getByRole('link', { name, exact: true })).toHaveAttribute('aria-current', 'page');
+      await expectStaticPreviews(page);
+    }
+  } finally {
+    await context.close();
+  }
 });
