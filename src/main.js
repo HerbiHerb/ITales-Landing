@@ -13,7 +13,8 @@ initHero();
 initMedia();
 const carousel = document.getElementById('worlds-carousel');
 if (carousel) {
-  new Carousel(carousel, { interval: false, touch: true });
+  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  new Carousel(carousel, { interval: 2500, ride: prefersReducedMotion ? false : 'carousel', touch: true });
   carousel.addEventListener('slid.bs.carousel', () => {
     carousel.querySelectorAll('.carousel-item').forEach((item) => item.setAttribute('aria-hidden', String(!item.classList.contains('active'))));
   });

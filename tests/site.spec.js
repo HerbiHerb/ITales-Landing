@@ -104,7 +104,16 @@ test('reduced motion shows hero copy immediately and no empty video players', as
   }
 });
 
-test('carousel controls change the illustration without autoplay', async ({ page }) => {
+test('carousel advances automatically', async ({ page }) => {
+  await page.goto('index.html');
+  const carousel = page.locator('#worlds-carousel');
+  await carousel.scrollIntoViewIfNeeded();
+  const activeSlide = carousel.locator('.carousel-item.active');
+  const initialSlide = await activeSlide.getAttribute('data-media');
+  await expect.poll(() => activeSlide.getAttribute('data-media'), { timeout: 4500 }).not.toBe(initialSlide);
+});
+
+test('carousel controls change the illustration with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('index.html');
   const firstImage = page.locator('.carousel-item.active img');
