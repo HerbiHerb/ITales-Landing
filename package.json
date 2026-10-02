@@ -1,0 +1,23 @@
+{
+  "name": "itales-landing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "build:production": "node scripts/build-production.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "playwright test",
+    "optimize:media": "node scripts/optimize-media.mjs"
+  },
+  "dependencies": {
+    "bootstrap": "5.3.6",
+    "typed.js": "2.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "sharp": "^0.35.5",
+    "vite": "^7.1.5"
+  }
+}
