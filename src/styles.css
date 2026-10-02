@@ -80,6 +80,8 @@ p { color: var(--text-secondary); }
 .teaser-copy p:not(.eyebrow) { margin: 1rem 0; }
 .preview-link { font-weight: 800; font-size: .95rem; text-decoration: none; }
 .preview-link span { margin-left: .4rem; }
+.demo-embed { display: flex; justify-content: center; }
+.demo-embed iframe { display: block; width: 552px; max-width: 100%; height: 167px; border: 0; }
 .detail-list { color: var(--text-secondary); padding-left: 1.2rem; font-size: .92rem; }
 .detail-list li { padding-left: .3rem; margin-bottom: .75rem; }
 .detail-list li::marker { color: var(--text-accent); }
@@ -196,6 +198,7 @@ textarea.form-control { resize: vertical; }
   .typed-hero-heading { font-size: .86rem; }
   .hero-animated .typed-hero-box:not(.is-active):not(.is-complete) { transform: scale(.9); }
   .teaser-copy, .feature-card { padding: 1.5rem; }
+  .demo-embed iframe { height: 200px; }
   .faq-item summary { padding: 1.1rem 1.2rem; }
   .faq-answer { padding: 0 1.2rem 1.2rem; }
   .carousel-item { height: 360px; }

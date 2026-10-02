@@ -53,6 +53,7 @@ async function expectStaticPreviews(page) {
 
 test('all static pages and local assets load at mobile, tablet and desktop sizes', async ({ page }) => {
   const failures = [];
+  await page.route('https://itch.io/embed/**', (route) => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Quantum-Echo</title>' }));
   page.on('pageerror', (error) => failures.push(error.message));
   page.on('response', (response) => { if (response.status() >= 400) failures.push(`${response.status()} ${response.url()}`); });
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -124,6 +125,27 @@ test('carousel controls change the illustration with reduced motion', async ({ p
   await expect(page.locator('.carousel-item.active')).toContainText('Desktop or mobile');
   await page.getByRole('button', { name: 'Previous illustration' }).click();
   await expect(page.locator('.carousel-item.active')).toContainText('New form of interaction');
+});
+
+test('demo section embeds the original itch.io widget below the previews', async ({ page }) => {
+  const itchRequests = [];
+  await page.route('https://itch.io/embed/**', (route) => {
+    itchRequests.push(route.request().url());
+    return route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>Quantum-Echo</title>' });
+  });
+  await page.goto('index.html');
+  const section = page.getByRole('region', { name: 'Try the demo by yourself' });
+  expect(await section.evaluate((element) =>
+    Boolean(element.previousElementSibling?.querySelector('#discover-title') && element.nextElementSibling?.querySelector('#worlds-title'))
+  )).toBe(true);
+  const iframe = section.locator('iframe');
+  await expect(iframe).toBeVisible();
+  await expect(iframe).toHaveAttribute('src', /itch\.io\/embed\/5080059/);
+  await expect(iframe).toHaveAttribute('width', '552');
+  await expect(iframe).toHaveAttribute('height', '167');
+  await expect(section.getByRole('link', { name: 'Open Quantum-Echo on itch.io' })).toHaveAttribute('href', 'https://salt-coffee.itch.io/quantum-echo');
+  await expect(section.getByRole('button')).toHaveCount(0);
+  await expect.poll(() => itchRequests.length).toBe(1);
 });
 
 test('required answers and optional email consent are validated without sending', async ({ page }) => {
