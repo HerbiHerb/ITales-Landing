@@ -17,7 +17,7 @@ const googleMock = `
 async function mockGoogle(page) {
   const requests = [];
   page.on('request', (request) => {
-    if (/google-analytics\.com|googletagmanager\.com/.test(request.url())) requests.push(request.url());
+    if (/G-TEST12345/.test(request.url())) requests.push(request.url());
   });
   await page.route('https://www.googletagmanager.com/**', (route) => route.fulfill({ contentType: 'application/javascript', body: googleMock }));
   await page.route('https://**.google-analytics.com/**', (route) => route.abort());
@@ -156,7 +156,7 @@ test('required answers and optional email consent are validated without sending'
   await page.getByRole('button', { name: 'Send feedback' }).click();
   await expect(page.getByText('Please choose what interests you most.')).toBeVisible();
   await expect(page.getByText('Please choose an interest level from 1 to 5.')).toBeVisible();
-  await expect(page.getByLabel('Playing stories', { exact: true })).toBeFocused();
+  await expect(page.getByLabel('Nothing', { exact: true })).toBeFocused();
   await completeRequired(page);
   await page.getByLabel(/^Email/).fill('bad-address');
   await page.getByRole('button', { name: 'Send feedback' }).click();
@@ -169,6 +169,48 @@ test('required answers and optional email consent are validated without sending'
   await page.getByRole('button', { name: 'Send feedback' }).click();
   await expect(page.getByText(/Please enter your email to receive/)).toBeVisible();
   expect(requests).toHaveLength(0);
+});
+
+test('Nothing requires a brief reason and missing features reach the feedback submission', async ({ page }) => {
+  const payloads = [];
+  await page.route('https://formspree.io/f/testform', (route) => {
+    payloads.push(route.request().postDataJSON());
+    return route.fulfill({ status: 200, json: { ok: true } });
+  });
+  await page.goto('interest.html');
+  const options = page.locator('[name="interest_area"]');
+  await expect(options.first()).toHaveAttribute('value', 'nothing');
+  await expect(page.locator('#nothing-reason-field')).toBeHidden();
+  await page.getByLabel('Nothing', { exact: true }).check();
+  await expect(page.locator('#nothing-reason-field')).toBeVisible();
+  await page.locator('[name="interest_rating"][value="2"]').check();
+  await page.getByRole('button', { name: 'Send feedback' }).click();
+  await expect(page.getByText('Please briefly tell us why neither option interests you.')).toBeVisible();
+  await expect(page.locator('#nothing-reason')).toBeFocused();
+  expect(payloads).toHaveLength(0);
+  await page.getByLabel("Why doesn't either option interest you?").fill('  I prefer a different kind of game.  ');
+  await page.getByLabel('Do you miss any features?').fill('  Co-op play  ');
+  await page.getByRole('button', { name: 'Send feedback' }).click();
+  await expect(page.locator('#form-success')).toBeVisible();
+  expect(payloads).toEqual([{ interest_area: 'nothing', interest_rating: 2, nothing_reason: 'I prefer a different kind of game.', missing_features: 'Co-op play', feedback: '', source: 'direct', notify_launch: false }]);
+});
+
+test('changing away from Nothing hides and omits its explanation', async ({ page }) => {
+  let payload;
+  await page.route('https://formspree.io/f/testform', (route) => {
+    payload = route.request().postDataJSON();
+    return route.fulfill({ status: 200, json: { ok: true } });
+  });
+  await page.goto('interest.html');
+  await page.getByLabel('Nothing', { exact: true }).check();
+  await page.getByLabel("Why doesn't either option interest you?").fill('Not for me');
+  await page.getByLabel('Playing stories', { exact: true }).check();
+  await expect(page.locator('#nothing-reason-field')).toBeHidden();
+  await expect(page.locator('#nothing-reason')).toBeEmpty();
+  await page.locator('[name="interest_rating"][value="4"]').check();
+  await page.getByRole('button', { name: 'Send feedback' }).click();
+  await expect(page.locator('#form-success')).toBeVisible();
+  expect(payload).not.toHaveProperty('nothing_reason');
 });
 
 test('feedback without email succeeds even after declining analytics', async ({ page }) => {
@@ -267,7 +309,7 @@ for (const scenario of [
   });
 }
 
-test('there are no Google requests before consent or after declining across pages', async ({ page }) => {
+test('site Analytics makes no requests before consent or after declining across pages', async ({ page }) => {
   const requests = await mockGoogle(page);
   await page.goto('index.html');
   await page.locator('[data-interest-cta]').first().click();

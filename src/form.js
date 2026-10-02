@@ -6,6 +6,8 @@ export function initForm() {
   if (!form) return;
   const status = document.getElementById('form-status');
   const button = form.querySelector('[type="submit"]');
+  const nothingReasonField = document.getElementById('nothing-reason-field');
+  const nothingReason = form.elements.nothing_reason;
   const sourceParam = new URLSearchParams(location.search).get('source');
   const source = ['home', 'game', 'editor'].includes(sourceParam) ? sourceParam : 'direct';
   form.elements.source.value = source;
@@ -34,6 +36,25 @@ export function initForm() {
     return;
   }
 
+  function syncNothingReason() {
+    const selected = form.elements.interest_area.value === 'nothing';
+    nothingReasonField.hidden = !selected;
+    nothingReason.required = selected;
+    if (!selected) {
+      nothingReason.value = '';
+      nothingReason.removeAttribute('aria-invalid');
+      const error = form.querySelector('[data-error="nothing_reason"]');
+      error.hidden = true;
+      error.textContent = '';
+    }
+  }
+
+  form.addEventListener('change', (event) => {
+    if (event.target.name === 'interest_area') syncNothingReason();
+  });
+  window.addEventListener('pageshow', syncNothingReason);
+  syncNothingReason();
+
   form.addEventListener('input', (event) => {
     if (event.target.type === 'hidden' || started) return;
     started = true;
@@ -46,9 +67,13 @@ export function initForm() {
     clearErrors();
     const data = new FormData(form);
     const email = String(data.get('email') || '').trim();
+    const interestArea = data.get('interest_area');
+    const reason = String(data.get('nothing_reason') || '').trim();
+    const missingFeatures = String(data.get('missing_features') || '').trim();
     form.elements.email.value = email;
     let valid = true;
-    if (!data.get('interest_area')) { fieldError('interest_area', 'Please choose what interests you most.'); valid = false; }
+    if (!interestArea) { fieldError('interest_area', 'Please choose what interests you most.'); valid = false; }
+    if (interestArea === 'nothing' && !reason) { fieldError('nothing_reason', 'Please briefly tell us why neither option interests you.'); valid = false; }
     if (!data.get('interest_rating')) { fieldError('interest_rating', 'Please choose an interest level from 1 to 5.'); valid = false; }
     if (email && !form.elements.email.validity.valid) { fieldError('email', 'Please enter a valid email address.'); valid = false; }
     if (email && !form.elements.notify_launch.checked) { fieldError('notify_launch', 'To leave your email, please agree to a launch notification, or remove your email.'); valid = false; }
@@ -57,7 +82,9 @@ export function initForm() {
 
     // Explicitly enumerate submitted values; no browser identifiers or analytics data.
     const payload = {
-      interest_area: data.get('interest_area'), interest_rating: Number(data.get('interest_rating')),
+      interest_area: interestArea, interest_rating: Number(data.get('interest_rating')),
+      ...(interestArea === 'nothing' ? { nothing_reason: reason } : {}),
+      ...(missingFeatures ? { missing_features: missingFeatures } : {}),
       feedback: String(data.get('feedback') || '').trim(), source,
       ...(email ? { email, notify_launch: true } : { notify_launch: false }),
     };
@@ -76,7 +103,7 @@ export function initForm() {
       if (!response.ok || result?.ok !== true) {
         if (Array.isArray(result?.errors)) {
           result.errors.forEach((error) => {
-            if (['interest_area', 'interest_rating', 'email', 'notify_launch'].includes(error.field)) {
+            if (['interest_area', 'nothing_reason', 'interest_rating', 'email', 'notify_launch'].includes(error.field)) {
               fieldError(error.field, error.field === 'email' ? 'Please check your email address.' : 'Please check this answer and try again.');
             }
           });
